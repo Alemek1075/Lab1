@@ -3,6 +3,7 @@
 #include <vector>
 #include <random>
 
+
 struct Point {
     double x, y;
 public:
