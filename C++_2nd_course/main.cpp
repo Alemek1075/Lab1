@@ -1,45 +1,66 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include <random>
+#include <sstream>
+#include <stdexcept>
+
+using namespace std;
+
+void readValuesFromFile(const string& filename, double(&arr)[4], double& a, double& b) {
+    try {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            throw runtime_error("ERROR: Can't open file" + filename + "'");
+        }
+
+        string line;
+        if (!getline(file, line)) {
+            throw runtime_error("ERROR: Empty file");
+        }
+
+        stringstream ss(line);
+        double values[6];
+        int count = 0;
+
+        while (ss >> values[count]) {
+            ++count;
+            if (count > 6)
+                throw runtime_error("ERROR: too much numbers in file");
+        }
+
+        if (count < 6)
+            throw runtime_error("ERROR: not enought numbers in file");
 
 
-struct Point {
-    double x, y;
-public:
-    Point() {};
-    Point(double _x, double _y) : x(_x), y(_y) {};
-};
+        for (int i = 0; i < 4; ++i)
+            arr[i] = values[i];
 
 
-//123
+        a = values[4];
+        b = values[5];
 
-struct Matrix {
-    double a, b, c, d;
-public:
-    Point() {};
-    Point(double _x, double _y) : x(_x), y(_y) {};
-};
-
-class F {
-    int num;
-public:
-    Point operator() (double a, double b, double c, double d, double e, double f) {
-        return Point((a * x + b * y + e), (c * x + d * y + f));
     }
-    Point operator() (Matrix m, Point p, Vector v) {
-        return Point((a * x + b * y + e), (c * x + d * y + f));
-    }
-};
-
-//456
-
-int main() {
-    std::ifstream fin("input.txt");
-    std::ofstream fout("output.txt");
-
-    if (!fin.is_open() || !fout.is_open()) {
-        std::cerr << "Error while trying to open input file.\n";
-        return 1;
+    catch (const exception& e) {
+        cerr << e.what() << endl;
+        throw; 
     }
 }
+
+
+int main() {
+    double arr[4];
+    double a, b;
+
+    try {
+        readValuesFromFile("data.txt", arr, a, b);
+
+        cout << "arr = ";
+        for (double x : arr) cout << x << " ";
+        cout << "\na = " << a << ", b = " << b << endl;
+    }
+    catch (...) {
+        cerr << "ERROR" << endl;
+    }
+
+    return 0;
+}
+
