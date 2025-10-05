@@ -45,6 +45,7 @@ void readValuesFromFile(const string& filename, double(&arr)[4], double& a, doub
     }
 }
 
+
 int main() {
     double arr[4];
     double a, b;
