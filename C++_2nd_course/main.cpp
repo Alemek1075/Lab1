@@ -85,9 +85,26 @@ int main() {
     double a, b;
     vector<F> functions;
 
+    try {
+        readValuesFromFile(input, n, p, m, a, b, functions);
+    }
+    catch (const exception& e) {
+        cerr << "Error: " << e.what() << endl;
+        return 1;
+    }
+
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> dist(0, functions.size() - 1);
 
+    ofstream outfile(output);
+    if (!outfile.is_open()) {
+        cerr << "Cant open the output file.";
+        return 1;
+    }
+
+    
+    outfile.close();
     return 0;
 }
+
