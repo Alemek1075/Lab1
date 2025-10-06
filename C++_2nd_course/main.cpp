@@ -74,3 +74,20 @@ void readValuesFromFile(const string& filename, int& n, Point& p, double(&m)[2][
     }
     file.close();
 }
+
+int main() {
+    string input = "input.txt";
+    string output = "output.txt";
+
+    int n;
+    Point p;
+    double m[2][2];
+    double a, b;
+    vector<F> functions;
+
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dist(0, functions.size() - 1);
+
+    return 0;
+}
