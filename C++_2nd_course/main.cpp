@@ -28,3 +28,49 @@ public:
         p.x = px; p.y = py;
     }
 };
+
+void readValuesFromFile(const string& filename, int& n, Point& p, double(&m)[2][2], double& a, double& b, vector<F>& functions) {
+
+    ifstream file(filename);
+    if (!file.is_open()) {
+        throw runtime_error("Cant open file '" + filename + "'");
+    }
+
+    if (!(file >> n)) throw runtime_error("problem with amount of operations");
+    if (!(file >> p.x)) throw runtime_error("problem with x coordinate of starting point.");
+    if (!(file >> p.y)) throw runtime_error("problem with y coordinate of starting point.");
+
+    string line;
+    double values[6];
+    int count;
+    int index;
+    getline(file, line);
+    while (getline(file, line)) {
+        istringstream ss(line);
+
+        count = 0;
+
+        while (ss >> values[count]) {
+            ++count;
+        }
+
+        if (count > 6)
+            throw runtime_error("More than 6 digits");
+
+        if (count < 6)
+            throw runtime_error("Less than 6 digits");
+
+        index = 0;
+        for (int i = 0; i < 2; ++i) {
+            for (int j = 0; j < 2; ++j) {
+                m[i][j] = static_cast<double>(values[index++]);
+            }
+        }
+
+        a = static_cast<double>(values[4]);
+        b = static_cast<double>(values[5]);
+
+        functions.emplace_back(F(m, a, b));
+    }
+    file.close();
+}
