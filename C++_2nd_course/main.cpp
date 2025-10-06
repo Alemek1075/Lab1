@@ -22,7 +22,7 @@ public:
     };
 
     void operator() (Point& p) {
-        double px, py;
+        long double px, py;
         px = m[0][0] * p.x + m[0][1] * p.y + a;
         py = m[1][0] * p.x + m[1][1] * p.y + b;
         p.x = px; p.y = py;
@@ -103,8 +103,15 @@ int main() {
         return 1;
     }
 
+    int i = 0;
+    while (i < n) {
+        functions[dist(gen)](p);
+        outfile << p.x << " " << p.y << endl;
+        i++;
+    }
     
     outfile.close();
     return 0;
 }
+
 
