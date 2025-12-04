@@ -11,26 +11,44 @@ struct Point {
     long double x, y;
 };
 
-class F {
+struct Transform {
     double m[2][2];
     double a, b;
+};
+
+class F {
+    vector<Transform> transforms;
+    mt19937 gen;
+
 public:
-    F(double(&_m)[2][2], double _a, double _b) : a(_a), b(_b) {
+    F() {
+        random_device rd;
+        gen.seed(rd());
+    }
+
+    void add(double m[2][2], double a, double b) {
+        Transform t;
         for (int i = 0; i < 2; i++)
             for (int j = 0; j < 2; j++)
-                m[i][j] = _m[i][j];
-    };
+                t.m[i][j] = m[i][j];
+        t.a = a;
+        t.b = b;
+        transforms.push_back(t);
+    }
 
-    void operator() (Point& p) {
-        long double px, py;
-        px = m[0][0] * p.x + m[0][1] * p.y + a;
-        py = m[1][0] * p.x + m[1][1] * p.y + b;
-        p.x = px; p.y = py;
+    Point operator() (Point p) {
+        if (transforms.empty()) return p;
+        uniform_int_distribution<> dist(0, transforms.size() - 1);
+        const auto& t = transforms[dist(gen)];
+
+        return {
+            t.m[0][0] * p.x + t.m[0][1] * p.y + t.a,
+            t.m[1][0] * p.x + t.m[1][1] * p.y + t.b
+        };
     }
 };
 
-void readValuesFromFile(const string& filename, int& n, Point& p, double(&m)[2][2], double& a, double& b, vector<F>& functions) {
-
+void readValuesFromFile(const string& filename, int& n, Point& p, F& f) {
     ifstream file(filename);
     if (!file.is_open()) {
         throw runtime_error("Cant open file '" + filename + "'");
@@ -42,23 +60,23 @@ void readValuesFromFile(const string& filename, int& n, Point& p, double(&m)[2][
 
     string line;
     double values[6];
+    double m[2][2];
+    double a, b;
     int count;
     int index;
+
     getline(file, line);
     while (getline(file, line)) {
+        if (line.empty()) continue;
         istringstream ss(line);
 
         count = 0;
-
         while (ss >> values[count]) {
             ++count;
         }
 
-        if (count > 6)
-            throw runtime_error("More than 6 digits");
-
-        if (count < 6)
-            throw runtime_error("Less than 6 digits");
+        if (count > 6) throw runtime_error("More than 6 digits");
+        if (count < 6) throw runtime_error("Less than 6 digits");
 
         index = 0;
         for (int i = 0; i < 2; ++i) {
@@ -70,7 +88,7 @@ void readValuesFromFile(const string& filename, int& n, Point& p, double(&m)[2][
         a = static_cast<double>(values[4]);
         b = static_cast<double>(values[5]);
 
-        functions.emplace_back(F(m, a, b));
+        f.add(m, a, b);
     }
     file.close();
 }
@@ -81,21 +99,15 @@ int main() {
 
     int n;
     Point p;
-    double m[2][2];
-    double a, b;
-    vector<F> functions;
+    F f;
 
     try {
-        readValuesFromFile(input, n, p, m, a, b, functions);
+        readValuesFromFile(input, n, p, f);
     }
     catch (const exception& e) {
         cerr << "Error: " << e.what() << endl;
         return 1;
     }
-
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> dist(0, functions.size() - 1);
 
     ofstream outfile(output);
     if (!outfile.is_open()) {
@@ -105,13 +117,11 @@ int main() {
 
     int i = 0;
     while (i < n) {
-        functions[dist(gen)](p);
+        p = f(p);
         outfile << p.x << " " << p.y << endl;
         i++;
     }
-    
+
     outfile.close();
     return 0;
 }
-
-
